@@ -1,0 +1,39 @@
+# ==============================================================================
+# GLOBAL MODEL HYPERPARAMETERS
+# ==============================================================================
+
+# --- OBSERVATION ALIGNMENT ---
+# CORRECT_VELOCITY: true (auto-fit), false (0.0 km/s), or a number (e.g., 15.6 km/s)
+CORRECT_VELOCITY: false
+LOG_RAD_MAX: 5.0
+R_MIRI: 3000
+
+# --- ULTRANEST SETTINGS ---
+N_LIVE_POINTS: 400
+EVIDENCE_TOLERANCE: 0.5
+FRAC_REMAIN: 0.001
+
+# ==============================================================================
+# INDIVIDUAL MOLECULAR PROFILES & GRID CACHES
+# ==============================================================================
+# Note: Bounds for logN and T should be within the grid simulated in generate_grid.py.
+MOLECULES:
+  C2H2:
+    cache_path: "./models/C2H2/C2H2_R3000_cache.npy"
+    index_path: "./models/C2H2/C2H2_index.txt"
+    masks:
+      - [13.574, 13.815]
+    bounds:
+      T: [200.0, 1500.0]
+      logN: [14.0, 23]
+    plot_color: "r"
+  CO2:
+    cache_path: "./models/CO2/CO2_R3000_cache.npy"
+    index_path: "./models/CO2/CO2_index.txt"
+    masks:
+      - [14.9, 15.]
+      - [15.39, 15.424]
+    bounds:
+      T: [100.0, 1000.0]
+      logN: [14.0, 23]
+    plot_color: "b"
