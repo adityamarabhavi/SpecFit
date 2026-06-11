@@ -42,19 +42,3 @@ def get_grid_axes_from_index(index_file_path):
     logN_unique = np.log10(Ng_unique)
     
     return Tg_unique, logN_unique, len(Tg_unique), len(logN_unique)
-
-
-    # def get_grid_axes_from_index(index_file_path):
-#     """Extracts unique T and N grid axes directly from the index text file."""
-#     if not os.path.exists(index_file_path):
-#         raise FileNotFoundError(f"Grid index file '{index_file_path}' not found.")
-        
-#     data = np.loadtxt(index_file_path)
-#     Ng_all = data[:, 1]
-#     Tg_all = data[:, 2]
-    
-#     Tg_unique = np.unique(Tg_all)
-#     Ng_unique = np.unique(Ng_all)
-#     logN_unique = np.log10(Ng_unique)
-    
-#     return Tg_unique, logN_unique, len(Tg_unique), len(logN_unique)

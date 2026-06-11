@@ -5,7 +5,6 @@ Generates a grid of 0D slab models using prodimopy and writes them to disk.
 import numpy as np
 import os
 from itertools import product as it_product
-import prodimopy.hitran as ht
 import prodimopy.run_slab as runs 
 
 #===========================================================================================
