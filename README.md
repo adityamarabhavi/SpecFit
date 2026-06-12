@@ -1,3 +1,6 @@
+[![Pythonv](https://img.shields.io/badge/Python-3.12%2C%203.13%2C%203.14-brightgreen.svg)](https://github.com/adityamarabhavi/SpecFit) [![prodimopy](https://img.shields.io/pypi/v/prodimopy?label=prodimopy&color=%23ff8800)](https://pypi.org/project/prodimopy/) [![License](https://img.shields.io/badge/license-GNUv3-blue?style=flat)](https://github.com/adityamarabhavi/SpecFit/blob/master/LICENSE)
+
+
 # Spectral Fitting pipeline (SpecFit)
 
 This repository contains a robust Python pipeline for spectral fitting of IR spectra, specifically designed for JWST MIRI observations. It generates 0D slab models using `prodimopy`, processes them into an interpolated grid cache, and performs Bayesian parameter estimation using `UltraNest`.
