@@ -13,3 +13,57 @@ This repository contains a robust Python pipeline for spectral fitting of IR spe
 * **`h2o_template.dat`**: A template water spectrum used for dynamic velocity corrections during the fitting process.
 
 ---
+
+## 🚀 Usage Guide
+
+Follow these steps to execute the full pipeline from model generation to final plotting.
+
+> [!NOTE]
+> **Steps 1 and 2 need to be done only once, per molecule. If these steps are already done, only steps 3 through 5 are required for performing the fit and plotting the results.**
+
+### Step 1: Generate Slab Models
+Define your grid parameters (Temperature range, Column Density range, turbulent velocity) in `generate_grid.py`, as well as the HITRAN molecular paths. Run the script to generate the slab models (FITS files) and the `index.txt` grid reference.
+```bash
+python generate_grid.py
+```
+Note: This step can be computationally intensive depending on the grid size and core count configuration.
+
+### Step 2: Build the Interpolation Cache
+Once the slab models are generated, build the .npy cache to massively speed up the fitting process. Modify `SLAB_DIR` and molecular settings as needed within the script.
+
+```bash
+python build_cache.py
+```
+This will output a `{Molecule}_R{Resolution}_cache.npy` file and an `intermediate_wave.npy` file.
+
+### Step 3: Set up Configuration
+Edit the `config.yaml` file to link your observed data and set up the hyperparameters:
+Setting `CORRECT_VELOCITY` to true will enable automatic velocity correction using pure rotational water lines. Setting it to a fixed value assumes the specified number as the systemic velocity of the source, setting it to false assumes 0 km/s velocity.
+Define the miri spectral resolving power, `R_MIRI`.
+For each molecule under `MOLECULES`, define the bounds for T and logN (ensure these are not out of bounds of the grid generated in Step 1).
+Provide the correct paths to the generated cache files and index.txt.
+
+### Step 4: Perform the Fit
+Run the nested sampling routine. The script accepts the path to the observed data and an optional distance to the source (defaults to 150 pc if omitted).
+The observed data file should contain a `numpy.loadtxt()` readable file containing at least four columns: 1) wavelength, 2) flux, 3) error, 4) continuum.
+
+Standard run (single core):
+
+```bash
+python fit_spectra.py path_to_obs_data.txt 150
+```
+
+Parallel run (MPI multi-core):
+UltraNest supports MPI out of the box, drastically reducing computation time.
+```bash
+mpiexec -n 4 python fit_spectra.py path_to_obs_data.txt 150
+```
+(Replace 4 with the number of available cores).
+
+### Step 5: Plot the Results
+Once the fit has converged, fit_spectra.py will have created a `run_ultranest_{source_name}` directory containing the chains. Use the plotting script to generate corner plots and the best-fit spectral overview.
+
+```bash
+python plot_fit.py path_to_obs_data.txt 150
+```
+This will read the `equal_weighted_post.txt` from the UltraNest output directory and generate the final PDF plots showcasing the spectral fit for all active molecules defined in the YAML config.
