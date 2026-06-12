@@ -21,7 +21,7 @@ N_grid = params[:,1]
 vturb = np.full_like(T_grid,vturb)
 
 #===========================================================================================
-# SETUP
+# SETUP (here is an example for CO2+13CO2 in a ratio of 35:1)
 #===========================================================================================
 output_dir = './models/CO2/'                             # Directory to store slab model output files
 list_of_molecules = ['CO2','CO2']                        # for isotopologues input the main molecule here and iso number below
