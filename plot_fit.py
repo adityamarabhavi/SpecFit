@@ -35,7 +35,6 @@ except IndexError:
     
 FLUX_SCALE = np.pi * (au / distance / pc)**2 * 1e23
 
-# Load Config
 config = load_config("config.yaml")
 MOLECULE_CONFIG = config["MOLECULES"]
 CORRECT_VELOCITY = config["CORRECT_VELOCITY"]
@@ -61,17 +60,13 @@ def auto_screen_molecules(source_wave, source_flux, source_err):
 # ==========================================
 data = np.loadtxt(obs_file)
 w, f, e, continuum = data[:,0], data[:,1], data[:,2], data[:,3]
-
 inds = np.argsort(w)
 source_wave_raw = w[inds]
 flux = f[inds]
 source_err = e[inds]
 continuum = continuum[inds]
-
-# Subtract the pre-computed continuum
 source_flux = flux - continuum
 
-# Velocity Router (Assumes 0.0 for static plot unless hardcoded in config)
 if isinstance(CORRECT_VELOCITY, (int, float)) and not isinstance(CORRECT_VELOCITY, bool):
     best_v_kms = float(CORRECT_VELOCITY)
 else:
@@ -82,7 +77,6 @@ source_wave_rest = source_wave_raw / (1.0 + best_v_kms / c_kms)
 
 active_molecules = list(MOLECULE_CONFIG.keys()) 
 
-# Build global fit mask for the observation
 fit_mask = np.zeros_like(source_wave_rest, dtype=bool)
 for mol in active_molecules:
     for wl_range in MOLECULE_CONFIG[mol]["masks"]:
@@ -94,27 +88,17 @@ for mol in active_molecules:
 interps, labels = [], []
 
 for mol_name in active_molecules:
-    # 1. Extract file paths dynamically
     cache_path = MOLECULE_CONFIG[mol_name]["cache_path"]
     idx_path = MOLECULE_CONFIG[mol_name]["index_path"]
     mol_dir = os.path.dirname(cache_path)
     wave_path = os.path.join(mol_dir, "intermediate_wave.npy")
-    
-    # 2. Extract specific T and N axes for this molecule
     mol_Tg, mol_Ntot, mol_nT, mol_nN = get_grid_axes_from_index(idx_path)
-    
-    # 3. Load Cache & Intermediate Wave
     raw_cache = np.load(cache_path)
     intermediate_wave = np.load(wave_path)
-    
-    # 4. Rebin to observation grid
     rebinned_2d = spectres(source_wave_rest, intermediate_wave, raw_cache, verbose=False, fill=0.0)
     grid_3d = rebinned_2d.reshape((mol_nT, mol_nN, len(source_wave_rest)))
-    
-    # 5. Build Interpolator using specific axes
     interps.append(RegularGridInterpolator((mol_Tg, mol_Ntot), grid_3d, bounds_error=False, fill_value=np.inf))
     labels.extend([rf"$T_{{\mathrm{{{mol_name}}}}}$ (K)", rf"$\log N_{{\mathrm{{{mol_name}}}}}$"])
-    
     del raw_cache, grid_3d
 
 if not os.path.exists(chain_file):
@@ -128,10 +112,8 @@ best_params = np.percentile(samples, 50, axis=0)
 # ==========================================
 def get_individual_radii_multi(theta_vector):
     n_mol = len(active_molecules)
-    # The interpolators are perfectly aligned with the theta vector positions
     mol_templates = [interps[i]((theta_vector[i*2], theta_vector[i*2+1])) * FLUX_SCALE for i in range(n_mol)]
     y_data, weights = source_flux[fit_mask], 1.0 / (source_err[fit_mask]**2)
-    
     A_mat = np.zeros((n_mol, n_mol))
     b_vec = np.zeros(n_mol)
     for j in range(n_mol):
@@ -139,7 +121,6 @@ def get_individual_radii_multi(theta_vector):
         b_vec[j] = np.sum(y_data * M_j * weights)
         for k in range(n_mol):
             A_mat[j, k] = np.sum(M_j * mol_templates[k][fit_mask] * weights)
-            
     try:
         best_areas = np.linalg.solve(A_mat, b_vec)
     except np.linalg.LinAlgError:
@@ -156,7 +137,6 @@ output_pdf = f"corner_plot_report_{name}.pdf"
 print(f"Compiling plots into: {output_pdf}")
 
 with PdfPages(output_pdf) as pdf:
-    # Page 1: Corner Plot
     fig_corner = corner.corner(
         samples, labels=labels, quantiles=[0.16, 0.50, 0.84], show_titles=True, 
         title_fmt=".2f", color="darkblue", range=[0.999] * len(labels)
@@ -165,7 +145,6 @@ with PdfPages(output_pdf) as pdf:
     pdf.savefig(fig_corner, bbox_inches='tight')
     plt.close(fig_corner)
 
-    # Page 2: Spectral Plot
     fig_spec, ax = plt.subplots(2, figsize=(18, 8), sharex=True)
     all_masks = [wl for mol in active_molecules for r in MOLECULE_CONFIG[mol]["masks"] for wl in r]
     w_min, w_max = min(all_masks) - 0.2, max(all_masks) + 0.2

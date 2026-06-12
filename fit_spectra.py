@@ -133,7 +133,6 @@ if __name__ == '__main__':
     source_wave_raw, flux, source_err, continuum = w[inds], f[inds], e[inds], continuum[inds]
     source_flux = flux - continuum
 
-    # --- Velocity Correction Router ---
     if isinstance(CORRECT_VELOCITY, bool):
         if CORRECT_VELOCITY is True:
             h2o_mask = np.zeros_like(source_wave_raw, dtype=bool)
@@ -164,27 +163,21 @@ if __name__ == '__main__':
         
     source_wave_rest = source_wave_raw / (1.0 + best_v_kms / c_kms)
 
-    # Initialize Active Targets
     active_molecules = list(MOLECULE_CONFIG.keys()) 
     
     # ---------------------------------------------------------
     # DYNAMIC GRID META EXTRACTOR
     # ---------------------------------------------------------
     interps, param_names = [], []
-    grid_meta = {}  # Store the specific grid limits for each molecule
+    grid_meta = {}  
     
     for mol_name in active_molecules:
         print(f"Loading matrix and grid axes for: {mol_name}...")
-        
         if "index_path" in MOLECULE_CONFIG[mol_name]:
             idx_path = MOLECULE_CONFIG[mol_name]["index_path"]
         else:
             idx_path = os.path.join(os.path.dirname(MOLECULE_CONFIG[mol_name]["cache_path"]), f"{mol_name}_index.txt")
-            
-        # 2. Extract specific T and N axes
         mol_Tg, mol_Ntot, mol_nT, mol_nN = get_grid_axes_from_index(idx_path)
-        
-        # 3. Store metadata for the log_likelihood function
         grid_meta[mol_name] = {
             'Tg': mol_Tg,
             'Ntot': mol_Ntot,
@@ -193,20 +186,12 @@ if __name__ == '__main__':
             'N_MIN': mol_Ntot.min(),
             'N_MAX': mol_Ntot.max()
         }
-        
-        # 4. Load Cache and Rebin
         raw_cache = np.load(MOLECULE_CONFIG[mol_name]["cache_path"])
         intermediate_wave = np.load(os.path.join(os.path.dirname(MOLECULE_CONFIG[mol_name]["cache_path"]), "intermediate_wave.npy"))
-        
-        # Pass the specific n_T and n_N to the rebinning function
         grid_3d = rebin_grid_for_source(source_wave_rest, intermediate_wave, raw_cache, mol_nT, mol_nN)
-        
-        # 5. Build Interpolator using specific axes
         interps.append(RegularGridInterpolator((mol_Tg, mol_Ntot), grid_3d, bounds_error=False, fill_value=np.inf))
         param_names.extend([f"{mol_name}_T", f"{mol_name}_logN"])
-        
         del raw_cache, grid_3d
-
     fit_mask = compile_mcmc_meta(source_wave_rest, active_molecules)
 
     # --- ULTRANEST SAMPLING ---

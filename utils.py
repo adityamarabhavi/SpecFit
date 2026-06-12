@@ -26,19 +26,10 @@ def get_grid_axes_from_index(index_file_path):
     """
     if not os.path.exists(index_file_path):
         raise FileNotFoundError(f"Grid index file '{index_file_path}' not found. Did you run the grid generation step?")
-        
-    # Read the text file (skipping headers automatically handled by numpy)
     data = np.loadtxt(index_file_path)
-    
-    # Standard prodimopy index format: [Index, Ng, Tg, vturb]
     Ng_all = data[:, 1]
     Tg_all = data[:, 2]
-    
-    # Extract unique, sorted grid points
     Tg_unique = np.unique(Tg_all)
     Ng_unique = np.unique(Ng_all)
-    
-    # Convert Ng back to log10(N) for the interpolators and priors
     logN_unique = np.log10(Ng_unique)
-    
     return Tg_unique, logN_unique, len(Tg_unique), len(logN_unique)
