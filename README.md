@@ -26,7 +26,8 @@ Define your grid parameters (Temperature range, Column Density range, turbulent 
 ```bash
 python generate_grid.py
 ```
-Note: This step can be computationally intensive depending on the grid size and core count configuration.
+> [!NOTE]
+> This step can be computationally intensive depending on the grid size and core count configuration.
 
 ### Step 2: Build the Interpolation Cache
 Once the slab models are generated, build the .npy cache to massively speed up the fitting process. Modify `SLAB_DIR` and molecular settings as needed within the script.
