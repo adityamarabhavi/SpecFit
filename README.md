@@ -18,6 +18,27 @@ This repository contains a robust Python pipeline for spectral fitting of IR spe
 
 Follow these steps to execute the full pipeline from model generation to final plotting.
 
+### Step 0: Installing Dependencies
+The pipeline requires the following python packages
+- `numpy`
+- `scipy`
+- `matplotlib`
+- `PyYAML`
+- `corner`
+- `ultranest`
+- `spectres`
+- `prodimopy`
+
+These can be installed individually or can be installed in one go via `pip install -r requirements.txt`
+
+> [!IMPORTANT]
+> To run the fitting pipeline in multi-core mode via `mpiexec`, you must have an active Message Passing Interface (MPI) installation on your system (e.g., OpenMPI or MPICH) and install `mpi4py`.
+> 
+> You can install the required Python bindings using pip:
+> ```bash
+> pip install mpi4py
+> ```
+
 > [!NOTE]
 > **Steps 1 and 2 need to be done only once, per molecule. If these steps are already done, only steps 3 through 5 are required for performing the fit and plotting the results.**
 
