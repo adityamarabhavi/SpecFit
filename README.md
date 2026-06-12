@@ -2,6 +2,8 @@
 
 This repository contains a robust Python pipeline for spectral fitting of IR spectra, specifically designed for JWST MIRI observations. It generates 0D slab models using `prodimopy`, processes them into an interpolated grid cache, and performs Bayesian parameter estimation using `UltraNest`.
 
+If you use this pipeline in scientific publication please cite Arabhavi et al. (in prep.) and acknowledge `prodimopy`. See LICENSE file.
+
 ## 📁 Repository Contents
 
 * **`generate_grid.py`**: Generates a grid of 0D slab models over specified ranges of Temperature (T) and Column Density (N) using `prodimopy.run_slab`. Outputs high-resolution synthetic spectra as FITS files.
